@@ -526,13 +526,16 @@ func downloadScript(codeServerPath string) string {
 pkill -f %v || true
 mkdir -p ~/.local/share/code-server %v
 cd %v
-curlflags="-o latest-linux"
-if [ -f latest-linux ]; then
-	curlflags="$curlflags -z latest-linux"
+wget https://github.com/cdr/code-server/releases -O codeserver.rel
+curlurl=$(grep '/*-linux-x86_64.tar.gz' codeserver.rel | head -n 1 | sed -r 's/.* href="([^"]+)" .*/https:\/\/github.com\1/')
+curlflags="-L -o latest-linux.tar.gz"
+if [ -f latest-linux.tar.gz ]; then
+	curlflags="$curlflags -z latest-linux.tar.gz"
 fi
-curl $curlflags https://codesrv-ci.cdr.sh/latest-linux
+curl $curlflags $curlurl
+tar xf latest-linux.tar.gz
 [ -f %v ] && rm %v
-ln latest-linux %v
+ln $(ls -r -1 */code-server | head -n 1) %v
 chmod +x %v`,
 		codeServerPath,
 		filepath.Dir(codeServerPath),
